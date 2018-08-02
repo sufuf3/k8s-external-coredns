@@ -4,7 +4,7 @@ metadata:
   name: nginx-ingress
 spec:
   rules:
-  - host: nginx.k8s.local
+  - host: nginx.cluster.local
     http:
       paths:
       - backend:
