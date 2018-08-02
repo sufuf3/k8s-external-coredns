@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns
+  namespace: dns
+data:
+  Corefile: |-
+    .:53 {
+      errors # coredns.io/plugins/errors
+      health # coredns.io/plugins/health
+      kubernetes cluster.local { # coredns.io/plugins/kubernetes
+        pods insecure # backward compatibility with kube-dns
+        upstream
+        fallthrough in-addr.arpa ip6.arpa
+      }
+      log . { # coredns.io/plugins/log
+        class denial success
+      }
+      cache # coredns.io/plugins/cache
+      loadbalance # coredns.io/plugins/loadbalance ( default, and only option, is “round_robin”)
+      whoami # coredns.io/plugins/whoami
+      prometheus 0.0.0.0:9153 # coredns.io/plugins/metrics
+      proxy . /etc/resolv.conf # coredns.io/plugins/proxy
+      proxy . 8.8.8.8:53
+    }
+
+    cluster.local {
+      etcd cluster.local { # coredns.io/plugins/etcd
+        stubzones
+        path /skydns
+        endpoint http://coredns-etcd:2379
+        upstream 8.8.8.8:53 8.8.4.4:53
+        debug
+      }
+      errors
+      log
+    }
