@@ -1,3 +1,6 @@
+# CLUSTER_DNS_IP=$(kubectl get service --namespace kube-system kube-dns -o jsonpath="{.spec.clusterIP}")
+# sed -e s/EXTERNAL_IP/$EXTERNAL_IP/g
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -15,7 +18,7 @@ spec:
     k8s-app: kube-dns
   type: LoadBalancer
   externalIPs:
-  - 100.67.151.8
+  - EXTERNAL_IP
   ports:
   - name: dns-tcp
     port: 53
