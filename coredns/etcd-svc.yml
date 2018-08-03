@@ -4,7 +4,7 @@ metadata:
   labels:
     k8s-app: kube-dns-etcd
   name: coredns-etcd
-  namespace: kube-dns
+  namespace: kube-system
 spec:
   ports:
   - name: etcd-http

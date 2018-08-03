@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: kube-dns
+  name: kube-coredns-tcp
   namespace: kube-system
   annotations:
     prometheus.io/port: "9153"
@@ -15,16 +15,11 @@ spec:
     k8s-app: kube-dns
   type: LoadBalancer
   externalIPs:
-  - 172.22.132.10
+  - 100.67.151.8
   ports:
-  - name: dns
-    port: 53
-    protocol: UDP
   - name: dns-tcp
     port: 53
     protocol: TCP
-  - name: metrics
-    port: 9153
-    protocol: TCP
-  selector:
-    k8s-app: kube-dns
+  #- name: metrics
+  #  port: 9153
+  #  protocol: TCP
