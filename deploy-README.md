@@ -120,4 +120,30 @@ cluster.local.      300 IN  SOA ns.dns.cluster.local. hostmaster.cluster.local. 
 ```
 
 ### 3. Create externalDNS
+1. deploy yml files
 
+```sh
+$ kubectl create -f external-dns/
+deployment.apps "external-dns" created
+serviceaccount "external-dns" created
+clusterrole.rbac.authorization.k8s.io "system:external-dns" created
+clusterrolebinding.rbac.authorization.k8s.io "system:external-dns-viewer" created
+```
+
+2. check
+```sh
+$ kubectl -n kube-system get po -l k8s-app=external-dns
+NAME                            READY     STATUS    RESTARTS   AGE
+external-dns-7b79cff6fc-6jrwl   1/1       Running   0          58s
+external-dns-7b79cff6fc-q2xwh   1/1       Running   0          58s
+[root@coco4 k8s-external-coredns]# kubectl -n kube-system get all -l k8s-app=external-dns
+NAME                                READY     STATUS    RESTARTS   AGE
+pod/external-dns-7b79cff6fc-6jrwl   1/1       Running   0          1m
+pod/external-dns-7b79cff6fc-q2xwh   1/1       Running   0          1m
+
+NAME                           DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/external-dns   2         2         2            2           1m
+
+NAME                                      DESIRED   CURRENT   READY     AGE
+replicaset.apps/external-dns-7b79cff6fc   2         2         2         1m
+```
