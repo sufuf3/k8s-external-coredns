@@ -91,5 +91,33 @@ NAME                                     DESIRED   CURRENT   READY     AGE
 replicaset.apps/coredns-etcd-9c44584cd   1         1         1         7m
 ```
 
+如果有 kube-dns ，把他移掉
+```sh
+kubectl delete --namespace=kube-system deployment kube-dns
+```
+
+4. dig 測試
+
+dig 是 DNS lookup 的工具。語法是  
+```sh
+SYNOPSIS
+       dig [@server] [-b address] [-c class] [-f filename] [-k filename] [-m] [-p port#] [-q name] [-t type] [-v] [-x addr] [-y [hmac:]name:key] [-4] [-6] [name]
+           [type] [class] [queryopt...]
+```
+
+所以 `dig @100.67.151.8 SOA cluster.local +noall +answer +time=2 +tries=1` 是從 DNS server 100.67.151.8 這台查詢。查詢的 type 是 SOA ，要查詢的 resource record 名稱是 cluster.local 。   
+`+noall` (Clear all display flags), `+answer`(Display the answer section of a reply.), `+time=T`(Sets the timeout for a query to T seconds.), `+tries=T`(Sets the number of times to try UDP queries to server to T instead of the default)  
+TTL 是 300 秒，所以如果有任何更改，需要等 300 秒(快取時間)  
+  
+```sh
+$ dig @100.67.151.8 SOA cluster.local +noall +answer +time=2 +tries=1
+
+; <<>> DiG 9.9.4-RedHat-9.9.4-61.el7 <<>> @100.67.151.8 SOA cluster.local +noall +answer +time=2 +tries=1
+; (1 server found)
+;; global options: +cmd
+cluster.local.      300 IN  SOA ns.dns.cluster.local. hostmaster.cluster.local. 1533283375 7200 1800 86400 30
+
+```
+
 ### 3. Create externalDNS
 
