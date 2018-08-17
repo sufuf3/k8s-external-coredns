@@ -77,7 +77,7 @@ deployment.apps/coredns    2         2         2            2           25m
 NAME                                  DESIRED   CURRENT   READY     AGE
 replicaset.apps/coredns-78666c95bd    2         2         2         25m
 
-$ kubectl get all -n kube-system -l k8s-app=kube-dns-etcd
+$ kubectl get all -n kube-system -l k8s-app=coredns-etcd
 NAME                               READY     STATUS    RESTARTS   AGE
 pod/coredns-etcd-9c44584cd-c2zw2   1/1       Running   0          7m
 
