@@ -90,7 +90,7 @@ NAME                                 DESIRED   CURRENT   READY     AGE
 replicaset.apps/coredns-75fcbf7b7f   2         2         2         2m
 ```
 
-> 如果有 kube-dns ，把他移掉 `kubectl delete --namespace=kube-system deployment kube-dns`  
+> 如果有 kube-dns ，把他移掉 `kubectl delete --namespace=kube-system deployment kube-dns` & `kubectl delete -n kube-system service/kube-dns`  
 
 - dig 測試
 
@@ -112,6 +112,28 @@ $ dig @100.67.151.8 SOA cluster.local +noall +answer +time=2 +tries=1
 ; (1 server found)
 ;; global options: +cmd
 cluster.local.          300     IN      SOA     ns.dns.cluster.local. hostmaster.cluster.local. 1534569563 7200 1800 86400 30
+
+$ dig @100.67.151.8 SOA cluster.local
+
+; <<>> DiG 9.9.4-RedHat-9.9.4-61.el7 <<>> @100.67.151.8 SOA cluster.local
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 52517
+;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+;; QUESTION SECTION:
+;cluster.local.         IN  SOA
+
+;; ANSWER SECTION:
+cluster.local.      300 IN  SOA ns.dns.cluster.local. hostmaster.cluster.local. 1534578600 7200 1800 86400 30
+
+;; Query time: 0 msec
+;; SERVER: 100.67.151.8#53(100.67.151.8)
+;; WHEN: Sat Aug 18 15:50:00 CST 2018
+;; MSG SIZE  rcvd: 135
 ```
 
 ### 2. Create externalDNS
@@ -171,7 +193,27 @@ service "wensleydale" created
 
 - check
 ```
-$ dig @100.67.151.8 A stilton.cluster.local +noall +answer
+$ dig @100.67.151.8 stilton.cluster.local A
+
+; <<>> DiG 9.9.4-RedHat-9.9.4-61.el7 <<>> @100.67.151.8 stilton.cluster.local A
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: SERVFAIL, id: 13887
+;; flags: qr aa rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 1, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+;; QUESTION SECTION:
+;stilton.cluster.local.     IN  A
+
+;; AUTHORITY SECTION:
+cluster.local.      300 IN  SOA ns.dns.cluster.local. hostmaster.cluster.local. 1534580417 7200 1800 86400 30
+
+;; Query time: 1 msec
+;; SERVER: 100.67.151.8#53(100.67.151.8)
+;; WHEN: Sat Aug 18 16:20:17 CST 2018
+;; MSG SIZE  rcvd: 143
 ```
 
 - look external-dns log
