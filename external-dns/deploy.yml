@@ -37,7 +37,13 @@ spec:
         image: registry.opensource.zalan.do/teapot/external-dns:v0.5.4
         env:
         - name: ETCD_URLS
-          value: "http://coredns-etcd:2379"
+          value: https://100.67.151.2:2379,https://100.67.151.3:2379,https://100.67.151.4:2379
+        - name: ETCD_CA_FILE
+          value: /etc/etcd/ssl/etcd-ca.pem
+        - name: ETCD_CERT_FILE
+          value: /etc/etcd/ssl/etcd.pem
+        - name: ETCD_KEY_FILE
+          value: /etc/etcd/ssl/etcd-key.pem
         args:
         - --provider=coredns
         - --source=service
@@ -45,8 +51,13 @@ spec:
         - --registry=txt
         - --interval=15s
         - --log-level=debug
-        # - --fqdn-template="{{.Namespace}}.k8s.local"
-        # - --domain-filter=k8s.local
-        # - --namespace=default
-        # - --txt-owner-id=default.k8s.local
-        # - --metrics-address=":7979"
+        volumeMounts:
+        - mountPath: /etc/etcd/ssl
+          name: etcd-ca-certs
+          readOnly: true
+      volumes:
+      - hostPath:
+          path: /etc/etcd/ssl
+          type: DirectoryOrCreate
+        name: etcd-ca-certs
+
