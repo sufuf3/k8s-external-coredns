@@ -21,10 +21,7 @@ data:
       loadbalance # coredns.io/plugins/loadbalance ( default, and only option, is “round_robin”)
       whoami # coredns.io/plugins/whoami
       prometheus 0.0.0.0:9153 # coredns.io/plugins/metrics
-      proxy . /etc/resolv.conf { # coredns.io/plugins/proxy
-        except cluster.local
-      }
-      proxy . 8.8.8.8:53
+      proxy . /etc/resolv.conf  # coredns.io/plugins/proxy
     }
 
     cluster.local {
