@@ -17,6 +17,7 @@ data:
         class denial success
       }
       cache # coredns.io/plugins/cache
+      reload
       loadbalance # coredns.io/plugins/loadbalance ( default, and only option, is “round_robin”)
       whoami # coredns.io/plugins/whoami
       prometheus 0.0.0.0:9153 # coredns.io/plugins/metrics

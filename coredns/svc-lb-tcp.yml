@@ -18,7 +18,7 @@ spec:
     k8s-app: kube-dns
   type: LoadBalancer
   externalIPs:
-  - EXTERNAL_IP
+  - 100.67.151.8
   ports:
   - name: dns-tcp
     port: 53
