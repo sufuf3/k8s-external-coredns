@@ -8,7 +8,7 @@ data:
     .:53 {
       errors # coredns.io/plugins/errors
       health # coredns.io/plugins/health
-      kubernetes cluster.local { # coredns.io/plugins/kubernetes
+      kubernetes cluster.local 10.96.0.0/12 { # coredns.io/plugins/kubernetes
         pods insecure # backward compatibility with kube-dns
         upstream
         fallthrough in-addr.arpa ip6.arpa
@@ -30,7 +30,7 @@ data:
       etcd cluster.local { # coredns.io/plugins/etcd
         stubzones
         path /skydns
-        endpoint http://coredns-etcd:2379
+        endpoint https://100.67.151.2:2379 https://100.67.151.3:2379 https://100.67.151.4:2379
         upstream 8.8.8.8:53 8.8.4.4:53
         debug
       }
