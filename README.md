@@ -71,6 +71,7 @@ kubectl create -f coredns/rbac/rbac-deploy.yml
 kubectl create -f coredns/svc-lb-tcp.yml
 kubectl create -f coredns/svc-lb-udp.yml
 ```
+
 - check
 ```sh
 $ kubectl get all -n kube-system -l k8s-app=kube-dns
@@ -90,8 +91,6 @@ replicaset.apps/coredns-75fcbf7b7f   2         2         2         2m
 ```
 
 > 如果有 kube-dns ，把他移掉 `kubectl delete --namespace=kube-system deployment kube-dns`  
-
-
 
 - dig 測試
 
@@ -115,4 +114,72 @@ $ dig @100.67.151.8 SOA cluster.local +noall +answer +time=2 +tries=1
 cluster.local.          300     IN      SOA     ns.dns.cluster.local. hostmaster.cluster.local. 1534569563 7200 1800 86400 30
 ```
 
-## 2. Create externalDNS
+### 2. Create externalDNS
+- Create externalDNS 
+```sh
+kubectl create -f external-dns/
+```
+- check
+```sh
+$ kubectl -n kube-system get all -l k8s-app=external-dns
+NAME                                READY     STATUS    RESTARTS   AGE
+pod/external-dns-86f6b66f6c-ddl2r   1/1       Running   0          44s
+pod/external-dns-86f6b66f6c-njcpn   1/1       Running   0          44s
+
+NAME                           DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/external-dns   2         2         2            2           44s
+
+NAME                                      DESIRED   CURRENT   READY     AGE
+replicaset.apps/external-dns-86f6b66f6c   2         2         2         44s
+```
+```sh
+$ kubectl -n kube-system logs -f pod/external-dns-654df9986f-zh4bk
+time="2018-08-18T06:04:10Z" level=info msg="config: {Master: KubeConfig: Sources:[service ingress] Namespace: AnnotationFilter: FQDNTemplate: CombineFQDNAndAnnotation:false Compatibility: PublishInternal:false ConnectorSourceServer:localhost:8080 Provider:coredns GoogleProject: DomainFilter:[] ZoneIDFilter:[] AWSZoneType: AWSAssumeRole: AWSMaxChangeCount:4000 AzureConfigFile:/etc/kubernetes/azure.json AzureResourceGroup: CloudflareProxied:false InfobloxGridHost: InfobloxWapiPort:443 InfobloxWapiUsername:admin InfobloxWapiPassword: InfobloxWapiVersion:2.3.1 InfobloxSSLVerify:true DynCustomerName: DynUsername: DynPassword: DynMinTTLSeconds:0 InMemoryZones:[] PDNSServer:http://localhost:8081 PDNSAPIKey: PDNSTLSEnabled:false TLSCA: TLSClientCert: TLSClientCertKey: Policy:sync Registry:txt TXTOwnerID:default TXTPrefix: Interval:15s Once:false DryRun:false LogFormat:text MetricsAddress::7979 LogLevel:debug TXTCacheInterval:0s}"
+time="2018-08-18T06:04:10Z" level=info msg="Connected to cluster at https://10.96.0.1:443"
+time="2018-08-18T06:04:10Z" level=debug msg="No endpoints could be generated from service default/cassandra"
+time="2018-08-18T06:04:10Z" level=debug msg="No endpoints could be generated from service default/http-svc-1"
+time="2018-08-18T06:04:10Z" level=debug msg="No endpoints could be generated from service default/http-svc-2"
+```
+
+### 服務測試
+
+- Add namespace on user host `/etc/resolv.conf`
+```sh
+nameserver 100.67.151.8
+```
+
+- No A record
+```sh
+$ dig @100.67.151.8 A stilton.cluster.local +noall +answer
+
+; <<>> DiG 9.9.4-RedHat-9.9.4-61.el7 <<>> @100.67.151.8 A stilton.cluster.local +noall +answer
+; (1 server found)
+;; global options: +cmd
+```
+
+- deploy apps
+```sh
+$ kubectl create -f apps/cheese/
+deployment.extensions "stilton" created
+deployment.extensions "cheddar" created
+deployment.extensions "wensleydale" created
+ingress.extensions "cheese" created
+service "stilton" created
+service "cheddar" created
+service "wensleydale" created
+```
+
+- check
+```
+$ dig @100.67.151.8 A stilton.cluster.local +noall +answer
+```
+
+- look external-dns log
+```sh
+$ kubectl -n kube-system logs -f pod/external-dns-654df9986f-zh4bk
+time="2018-08-18T06:34:25Z" level=debug msg="Endpoints generated from ingress: default/cheese: [stilton.cluster.local 0 IN A 100.67.151.8 cheddar.cluster.local 0 IN A 100.67.151.8 wensleydale.cluster.local 0 IN A 100.67.151.8]"
+time="2018-08-18T06:34:25Z" level=debug msg="Endpoints generated from ingress: default/nginx-ingress: [nginx.cluster.local 0 IN A 100.67.151.8]"
+```
+
+## Ref
+- https://github.com/coredns/deployment/blob/master/kubernetes/coredns.yaml.sed
